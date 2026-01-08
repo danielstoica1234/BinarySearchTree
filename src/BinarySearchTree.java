@@ -1,3 +1,6 @@
+import com.sun.source.tree.Tree;
+
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +21,19 @@ public class BinarySearchTree {
         this.root = null;
     }
 
+    public void test1() {
+        TreeNode node1 = new TreeNode(50);
+        TreeNode node2 = new TreeNode(40);
+        TreeNode node3 = new TreeNode(30);
+        TreeNode node4 = new TreeNode(75);
+        TreeNode node5 = new TreeNode(100);
+        root = node1;
+        node1.left = node2;
+        node2.left = node3;
+        node1.right = node4;
+        node4.right = node5;
+    }
+
     /**
      * Insert a value into the BST.
      * If the value already exists, do not insert it (no duplicates allowed).
@@ -27,8 +43,22 @@ public class BinarySearchTree {
     public void insert(int value) {
         // TODO: Implement this method
         // Hint: Use a recursive helper method
+        root = insertVal(root, value);
     }
 
+    private TreeNode insertVal(TreeNode node, int value){
+        if(node == null){
+            return new TreeNode(value);
+        }
+
+        if(value < node.data){
+            node.left = insertVal(node.left, value);
+        } else if (value > node.data){
+            node.right = insertVal(node.right, value);
+        }
+
+        return node;
+    }
     /**
      * Search for a value in the BST.
      *
@@ -38,6 +68,19 @@ public class BinarySearchTree {
     public boolean search(int value) {
         // TODO: Implement this method
         // Hint: Use recursion and leverage BST property
+        TreeNode cur = root;
+
+        while (cur != null){
+            if(value == cur.data){
+                return true;
+            } else if (value < cur.data){
+                cur = cur.left;
+            } else {
+                cur = cur.right;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -50,6 +93,37 @@ public class BinarySearchTree {
         // TODO: Implement this method
         // Hint: Handle three cases - leaf, one child, two children
         // For two children, use inorder successor or predecessor
+        root = deleteVal(root, value);
+    }
+
+    private TreeNode deleteVal(TreeNode node, int value){
+        if(node == null){
+            return null;
+        }
+
+        if(value < node.data){
+            node.left = deleteVal(node.left, value);
+        } else if (value > node.data){
+            node.right = deleteVal(node.right, value);
+        } else {
+            if(node.left == null && node.right == null){
+                return null;
+            }
+            if(node.left == null){
+                return node.right;
+            }
+            if(node.right == null){
+                return node.left;
+            }
+
+            TreeNode successor = node.right;
+            while(successor.left != null){
+                successor = successor.left;
+            }
+            node.data = successor.data;
+            node.right = deleteVal(node.right, successor.data);
+        }
+        return node;
     }
 
     /**
@@ -61,6 +135,14 @@ public class BinarySearchTree {
     public int findMin() {
         // TODO: Implement this method
         // Hint: Keep going left!
+        if(isEmpty()) {
+            throw new IllegalStateException("Empty tree!");
+        }
+        TreeNode cur = root;
+        while(cur.left != null){
+            cur = cur.left;
+        }
+        return cur.data;
     }
 
     /**
@@ -72,6 +154,14 @@ public class BinarySearchTree {
     public int findMax() {
         // TODO: Implement this method
         // Hint: Keep going right!
+        if(isEmpty()) {
+            throw new IllegalStateException("Empty tree!");
+        }
+        TreeNode cur = root;
+        while(cur.right != null){
+            cur = cur.right;
+        }
+        return cur.data;
     }
 
     /**
@@ -83,6 +173,18 @@ public class BinarySearchTree {
         // TODO: Implement this method
         // Hint: Left -> Root -> Right
         // Should return values in sorted order!
+        List<Integer> list = new ArrayList<>();
+        inorderRet(root, list);
+        return list;
+    }
+
+    private void inorderRet(TreeNode node, List<Integer> list){
+        if(node == null){
+            return;
+        }
+        inorderRet(node.left, list);
+        list.add(node.data);
+        inorderRet(node.right, list);
     }
 
     /**
@@ -93,6 +195,18 @@ public class BinarySearchTree {
     public List preorderTraversal() {
         // TODO: Implement this method
         // Hint: Root -> Left -> Right
+        List<Integer> list = new ArrayList<>();
+        preorderRet(root, list);
+        return list;
+    }
+
+    private void preorderRet(TreeNode node, List<Integer> list){
+        if(node == null){
+            return;
+        }
+        list.add(node.data);
+        inorderRet(node.left, list);
+        inorderRet(node.right, list);
     }
 
     /**
@@ -103,6 +217,18 @@ public class BinarySearchTree {
     public List postorderTraversal() {
         // TODO: Implement this method
         // Hint: Left -> Right -> Root
+        List<Integer> list = new ArrayList<>();
+        postorderRet(root, list);
+        return list;
+    }
+
+    private void postorderRet(TreeNode node, List<Integer> list){
+        if(node == null){
+            return;
+        }
+        inorderRet(node.left, list);
+        inorderRet(node.right, list);
+        list.add(node.data);
     }
 
     /**
@@ -115,6 +241,14 @@ public class BinarySearchTree {
     public int height() {
         // TODO: Implement this method
         // Hint: Use recursion - height = 1 + max(left height, right height)
+        return heightFind(root);
+    }
+
+    private int heightFind(TreeNode node){
+        if(isEmpty()){
+            return -1;
+        }
+        return 1 + Math.max(heightFind(node.left), heightFind(node.right));
     }
 
     /**
@@ -125,6 +259,14 @@ public class BinarySearchTree {
     public int size() {
         // TODO: Implement this method
         // Hint: Recursively count nodes
+        return sizeIterate(root);
+    }
+
+    private int sizeIterate(TreeNode node){
+        if(node == null){
+            return 0;
+        }
+        return 1 + sizeIterate(node.left) + sizeIterate(node.right);
     }
 
     /**
@@ -134,6 +276,7 @@ public class BinarySearchTree {
      */
     public boolean isEmpty() {
         // TODO: Implement this method
+        return root == null;
     }
 
     /**
